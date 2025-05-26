@@ -7,7 +7,7 @@ services:
     
     # GLPI container
     glpi:
-      #image:  registry.iutbeziers.fr/debianglpi:2.3
+      image:  registry.iutbeziers.fr/debianglpi:2.3
       build: .
       ports:
          - "0.0.0.0:9090:80"
