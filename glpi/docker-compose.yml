@@ -1,0 +1,37 @@
+# GLPI persistent data
+glpidata:
+  image: registry.iutbeziers.fr/debianiut
+  volumes:
+    - /var/www/html/glpi
+
+# GLPI container
+glpi:
+  #image:  registry.iutbeziers.fr/debianglpi:2.3
+  build: .
+  ports:
+     - "0.0.0.0:9090:80"
+  links:
+    - mysql:db
+  env_file:
+    - ./glpi.env
+  volumes_from:
+    - glpidata
+  volumes:
+    - /etc/timezone:/etc/timezone:ro
+    - /etc/localtime:/etc/localtime:ro
+  environment:
+      - TIMEZONE=Europe/Brussels
+
+# Database persistent data
+mysqldata:
+  image: registry.iutbeziers.fr/debianiut
+  volumes:
+    - /var/lib/mysql
+
+# Database container
+mysql:
+  image: registry.iutbeziers.fr/mariadbiut
+  env_file:
+    - ./glpi.env
+  volumes_from:
+    - mysqldata
