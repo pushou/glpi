@@ -1,38 +1,49 @@
+
+version: '3.9'
 services:
-    # GLPI persistent data
-    glpidata:
-      image: registry.iutbeziers.fr/debianiut
-      volumes:
-        - /var/www/html/glpi
-    
-    # GLPI container
-    glpi:
-      image:  registry.iutbeziers.fr/debianglpi:2.3
-      build: .
-      ports:
-         - "0.0.0.0:9090:80"
-      links:
-        - mysql:db
-      env_file:
-        - ./glpi.env
-      volumes_from:
-        - glpidata
-      volumes:
-        - /etc/timezone:/etc/timezone:ro
-        - /etc/localtime:/etc/localtime:ro
-      environment:
-          - TIMEZONE=Europe/Brussels
-    
-    # Database persistent data
-    mysqldata:
-      image: registry.iutbeziers.fr/debianiut
-      volumes:
-        - /var/lib/mysql
-    
-    # Database container
-    mysql:
-      image: registry.iutbeziers.fr/mariadbiut
-      env_file:
-        - ./glpi.env
-      volumes_from:
-        - mysqldata
+  glpi_app:
+    image: sdbrasil/glpi:10.0.18
+    container_name: glpi-10
+    volumes:
+      - glpi_config:/etc/glpi
+      - glpi_documents:/var/lib/glpi/files/data-documents
+      - glpi_plugins:/usr/share/glpi/plugins
+      - glpi_marketplace:/usr/share/glpi/marketplace
+      - glpi_files_plugins:/var/lib/glpi/files/_plugins
+      - glpi_backup:/backup
+    networks:
+      - glpi
+    ports:
+      - 80:80
+
+  glpidb:
+    image: registry.iutbeziers.fr/percona-server:8.0
+    container_name: db-glpi-10
+    networks:
+      - glpi
+    volumes:
+      - glpi_db_log:/var/log/mysql
+      - glpi_db_lib:/var/lib/mysql
+      - glpi_db_backup:/backup
+    environment:
+      - MYSQL_ROOT_PASSWORD=ADM@MySQL_GLP1
+      - MYSQL_DATABASE=glpi
+      - MYSQL_USER=glpi
+      - MYSQL_PASSWORD=GLP1_MySQL@10
+      - TZ=Europe/Paris
+
+networks:
+  glpi:
+    driver: bridge
+
+volumes:
+  glpi_config:
+  glpi_documents:
+  glpi_plugins:
+  glpi_marketplace:
+  glpi_files_plugins:
+  glpi_backup:
+  glpi_db_log:
+  glpi_db_lib:
+  glpi_db_backup:
+
